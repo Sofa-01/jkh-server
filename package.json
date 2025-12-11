@@ -1,0 +1,15 @@
+{
+  "name": "jkh-fullstack",
+  "version": "1.0.0",
+  "description": "JKH Inspection System - Full Stack",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "go run main.go",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:frontend": "cd frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+

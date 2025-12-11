@@ -1,0 +1,2997 @@
+basePath: /api/v1
+definitions:
+  models.AddElementToChecklistRequest:
+    properties:
+      element_id:
+        description: ID элемента из справочника ElementCatalog.
+        minimum: 1
+        type: integer
+      order_index:
+        description: |-
+          Порядок проверки элемента в чек-листе (опционально).
+          Если не указан, элемент добавляется в конец списка.
+        type: integer
+    required:
+    - element_id
+    type: object
+  models.AnalyticsReportRequest:
+    properties:
+      charts:
+        items:
+          type: string
+        type: array
+      district_ids:
+        items:
+          type: integer
+        type: array
+      from:
+        type: string
+      jkh_unit_ids:
+        items:
+          type: integer
+        type: array
+      to:
+        type: string
+    required:
+    - from
+    - to
+    type: object
+  models.AssignInspectorRequest:
+    properties:
+      inspector_id:
+        minimum: 1
+        type: integer
+    required:
+    - inspector_id
+    type: object
+  models.AssignInspectorToUnitRequest:
+    properties:
+      inspector_id:
+        minimum: 1
+        type: integer
+    required:
+    - inspector_id
+    type: object
+  models.BuildingInfo:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+    type: object
+  models.BuildingResponse:
+    properties:
+      address:
+        type: string
+      construction_year:
+        type: integer
+      description:
+        type: string
+      district_name:
+        description: Имена связанных сущностей
+        type: string
+      id:
+        type: integer
+      inspector_name:
+        type: string
+      jkh_unit_name:
+        type: string
+      photo_path:
+        type: string
+    type: object
+  models.ChecklistDetailResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      elements:
+        description: Список элементов в чек-листе
+        items:
+          $ref: '#/definitions/models.ChecklistElementDetail'
+        type: array
+      id:
+        type: integer
+      inspection_type:
+        type: string
+      title:
+        type: string
+    type: object
+  models.ChecklistElementDetail:
+    properties:
+      category:
+        description: Категория элемента
+        type: string
+      element_id:
+        description: ID элемента из ElementCatalog
+        type: integer
+      element_name:
+        description: Название элемента (например, "Кровля")
+        type: string
+      order_index:
+        description: Порядок проверки (1, 2, 3...)
+        type: integer
+    type: object
+  models.ChecklistInfo:
+    properties:
+      id:
+        type: integer
+      inspection_type:
+        type: string
+      title:
+        type: string
+    type: object
+  models.ChecklistResponse:
+    properties:
+      created_at:
+        description: ISO 8601 формат
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      inspection_type:
+        description: spring/winter/partial
+        type: string
+      title:
+        type: string
+    type: object
+  models.CreateBuildingRequest:
+    properties:
+      address:
+        type: string
+      construction_year:
+        type: integer
+      description:
+        description: nullable
+        type: string
+      district_id:
+        description: Обязательные внешние ключи
+        minimum: 1
+        type: integer
+      inspector_id:
+        description: FK (optional) — назначение инспектора необязательно
+        type: integer
+      jkh_unit_id:
+        minimum: 1
+        type: integer
+      photo_path:
+        description: nullable
+        type: string
+    required:
+    - address
+    - district_id
+    - jkh_unit_id
+    type: object
+  models.CreateChecklistRequest:
+    properties:
+      description:
+        description: Описание чек-листа (опционально).
+        type: string
+      inspection_type:
+        description: |-
+          Тип осмотра: "spring" (весенний), "winter" (зимний), "partial" (частичный).
+          Значение по умолчанию в БД: "partial".
+        enum:
+        - spring
+        - winter
+        - partial
+        type: string
+      title:
+        description: |-
+          Название чек-листа (например, "Весенний осмотр многоквартирных домов").
+          Поле обязательно и уникально в БД.
+        type: string
+    required:
+    - inspection_type
+    - title
+    type: object
+  models.CreateDistrictRequest:
+    properties:
+      name:
+        description: Название района (обязательное поле)
+        type: string
+    required:
+    - name
+    type: object
+  models.CreateElementCatalogRequest:
+    properties:
+      category:
+        description: |-
+          Категория элемента (опционально, для фильтрации и группировки).
+          Указатель (*string) позволяет отличить "не передано" от "пустая строка".
+          omitempty — если поле nil, оно не включается в JSON-ответ.
+        type: string
+      name:
+        description: |-
+          Название элемента (например, "Фундамент", "Кровля", "Стены").
+          Поле обязательно (binding:"required") — валидация на уровне Gin.
+        type: string
+    required:
+    - name
+    type: object
+  models.CreateInspectionResultRequest:
+    properties:
+      checklist_element_id:
+        description: ID элемента чек-листа (из ChecklistElement).
+        minimum: 1
+        type: integer
+      comment:
+        description: Комментарий инспектора (опционально).
+        type: string
+      condition_status:
+        description: |-
+          Статус состояния элемента.
+          Допустимые значения: "Исправное", "Удовлетворительное", "Неудовлетворительное", "Аварийное"
+        enum:
+        - Исправное
+        - Удовлетворительное
+        - Неудовлетворительное
+        - Аварийное
+        type: string
+    required:
+    - checklist_element_id
+    - condition_status
+    type: object
+  models.CreateJkhUnitRequest:
+    properties:
+      district_id:
+        minimum: 1
+        type: integer
+      name:
+        type: string
+    required:
+    - district_id
+    - name
+    type: object
+  models.CreateTaskRequest:
+    properties:
+      building_id:
+        description: ID здания для осмотра (обязательно).
+        minimum: 1
+        type: integer
+      checklist_id:
+        description: ID чек-листа для использования (обязательно).
+        minimum: 1
+        type: integer
+      description:
+        description: Подробное описание задания (опционально).
+        type: string
+      inspector_id:
+        description: ID назначенного инспектора (обязательно).
+        minimum: 1
+        type: integer
+      priority:
+        description: 'Приоритет: "срочный", "высокий", "обычный", "низкий".'
+        enum:
+        - срочный
+        - высокий
+        - обычный
+        - низкий
+        type: string
+      scheduled_date:
+        description: 'Планируемая дата и время осмотра (ISO 8601: "2025-04-15T10:00:00Z").'
+        type: string
+      title:
+        description: Название задания (краткое описание).
+        type: string
+    required:
+    - building_id
+    - checklist_id
+    - inspector_id
+    - scheduled_date
+    - title
+    type: object
+  models.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      login:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      role_name:
+        description: Имя роли (строка) будет преобразовано в ID в сервисном слое
+        enum:
+        - Coordinator
+        - Inspector
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - login
+    - password
+    - role_name
+    type: object
+  models.DistrictResponse:
+    properties:
+      id:
+        description: Уникальный идентификатор района
+        type: integer
+      name:
+        description: Название района
+        type: string
+    type: object
+  models.ElementCatalogResponse:
+    properties:
+      category:
+        description: Категория (всегда строка, даже если пустая)
+        type: string
+      id:
+        description: Уникальный идентификатор элемента
+        type: integer
+      name:
+        description: Название элемента
+        type: string
+    type: object
+  models.InspectionResultResponse:
+    properties:
+      checklist_element_id:
+        type: integer
+      comment:
+        type: string
+      condition_status:
+        description: Результат проверки
+        type: string
+      created_at:
+        type: string
+      element_category:
+        description: Категория
+        type: string
+      element_name:
+        description: Информация об элементе
+        type: string
+      order_index:
+        description: Порядок в чек-листе
+        type: integer
+      task_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.InspectorAssignmentResponse:
+    properties:
+      inspector_id:
+        type: integer
+      jkh_unit_id:
+        type: integer
+      message:
+        type: string
+    type: object
+  models.InspectorInfo:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+    type: object
+  models.JkhUnitResponse:
+    properties:
+      district_id:
+        type: integer
+      district_name:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      identifier:
+        type: string
+      password:
+        type: string
+    required:
+    - identifier
+    - password
+    type: object
+  models.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      role:
+        description: Роль для фронтенда (specialist, coordinator, inspector)
+        type: string
+    type: object
+  models.TaskDetailResponse:
+    properties:
+      building:
+        allOf:
+        - $ref: '#/definitions/models.BuildingInfo'
+        description: Детальная информация о связанных сущностях
+      checklist:
+        $ref: '#/definitions/models.ChecklistInfo'
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      inspector:
+        $ref: '#/definitions/models.InspectorInfo'
+      priority:
+        type: string
+      scheduled_date:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.TaskResponse:
+    properties:
+      building_address:
+        description: Упрощенная информация о связанных сущностях
+        type: string
+      checklist_title:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      inspector_name:
+        type: string
+      priority:
+        type: string
+      scheduled_date:
+        description: ISO 8601
+        type: string
+      status:
+        description: New, Pending, InProgress, etc.
+        type: string
+      title:
+        type: string
+    type: object
+  models.UpdateElementOrderRequest:
+    properties:
+      order_index:
+        description: Новый порядок проверки элемента.
+        minimum: 1
+        type: integer
+    required:
+    - order_index
+    type: object
+  models.UpdateTaskStatusRequest:
+    properties:
+      status:
+        enum:
+        - Pending
+        - InProgress
+        - OnReview
+        - ForRevision
+        - Approved
+        - Canceled
+        type: string
+    required:
+    - status
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      email:
+        description: Все поля опциональны, кроме ID, который берется из URL
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      login:
+        type: string
+      password:
+        description: Только если меняем пароль
+        minLength: 8
+        type: string
+      role_name:
+        enum:
+        - Coordinator
+        - Inspector
+        type: string
+    type: object
+  models.UserResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      login:
+        type: string
+      role_name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@jkh.local
+    name: Техническая поддержка
+  description: |-
+    REST API для системы осмотра жилых помещений ЖКХ.
+    Система предназначена для координации работы инспекторов,
+    управления заданиями на осмотр зданий и формирования отчётности.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: JKH Inspection API
+  version: "1.0"
+paths:
+  /admin/buildings:
+    get:
+      description: Возвращает список всех зданий в системе
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список зданий
+          schema:
+            items:
+              $ref: '#/definitions/models.BuildingResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список зданий
+      tags:
+      - Здания
+    post:
+      consumes:
+      - application/json
+      description: Создание нового здания для осмотра
+      parameters:
+      - description: Данные здания
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateBuildingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Здание успешно создано
+          schema:
+            $ref: '#/definitions/models.BuildingResponse'
+        "400":
+          description: Неверный запрос или FK не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Адрес здания уже существует
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать здание
+      tags:
+      - Здания
+  /admin/buildings/{id}:
+    delete:
+      description: Удаление здания из системы
+      parameters:
+      - description: ID здания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Здание успешно удалено
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Здание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: У здания есть активные задания
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить здание
+      tags:
+      - Здания
+    get:
+      description: Возвращает информацию о конкретном здании
+      parameters:
+      - description: ID здания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные здания
+          schema:
+            $ref: '#/definitions/models.BuildingResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Здание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить здание по ID
+      tags:
+      - Здания
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных здания
+      parameters:
+      - description: ID здания
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateBuildingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные здания
+          schema:
+            $ref: '#/definitions/models.BuildingResponse'
+        "400":
+          description: Неверный запрос или FK не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Здание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Адрес здания уже занят
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить здание
+      tags:
+      - Здания
+  /admin/checklists:
+    get:
+      description: Возвращает список всех чек-листов (без детализации элементов)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список чек-листов
+          schema:
+            items:
+              $ref: '#/definitions/models.ChecklistResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список чек-листов
+      tags:
+      - Чек-листы
+    post:
+      consumes:
+      - application/json
+      description: Создание нового чек-листа для осмотра зданий
+      parameters:
+      - description: Данные чек-листа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateChecklistRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Чек-лист успешно создан
+          schema:
+            $ref: '#/definitions/models.ChecklistResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Чек-лист с таким названием уже существует
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать чек-лист
+      tags:
+      - Чек-листы
+  /admin/checklists/{id}:
+    delete:
+      description: Удаление чек-листа из системы
+      parameters:
+      - description: ID чек-листа
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Чек-лист успешно удален
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Чек-лист не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Чек-лист используется в заданиях
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить чек-лист
+      tags:
+      - Чек-листы
+    get:
+      description: Возвращает детальную информацию о чек-листе включая список элементов
+      parameters:
+      - description: ID чек-листа
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные чек-листа с элементами
+          schema:
+            $ref: '#/definitions/models.ChecklistDetailResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Чек-лист не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить чек-лист по ID
+      tags:
+      - Чек-листы
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных чек-листа (название, тип осмотра)
+      parameters:
+      - description: ID чек-листа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateChecklistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные чек-листа
+          schema:
+            $ref: '#/definitions/models.ChecklistResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Чек-лист не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Название чек-листа уже занято
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить чек-лист
+      tags:
+      - Чек-листы
+  /admin/checklists/{id}/elements:
+    post:
+      consumes:
+      - application/json
+      description: Добавление элемента из справочника в чек-лист
+      parameters:
+      - description: ID чек-листа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID элемента и порядок
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddElementToChecklistRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Элемент успешно добавлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный запрос или элемент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Чек-лист не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Элемент уже добавлен в чек-лист
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Добавить элемент в чек-лист
+      tags:
+      - Чек-листы
+  /admin/checklists/{id}/elements/{element_id}:
+    delete:
+      description: Удаление элемента из конкретного чек-листа
+      parameters:
+      - description: ID чек-листа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID элемента
+        in: path
+        name: element_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Элемент успешно удален из чек-листа
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Элемент не найден в чек-листе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить элемент из чек-листа
+      tags:
+      - Чек-листы
+    put:
+      consumes:
+      - application/json
+      description: Изменение позиции элемента в чек-листе
+      parameters:
+      - description: ID чек-листа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID элемента
+        in: path
+        name: element_id
+        required: true
+        type: integer
+      - description: Новый порядковый номер
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateElementOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Порядок успешно изменен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Элемент не найден в чек-листе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Изменить порядок элемента
+      tags:
+      - Чек-листы
+  /admin/districts:
+    get:
+      description: Возвращает список всех районов города
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список районов
+          schema:
+            items:
+              $ref: '#/definitions/models.DistrictResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список районов
+      tags:
+      - Районы
+    post:
+      consumes:
+      - application/json
+      description: Создание нового района города
+      parameters:
+      - description: Данные района
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDistrictRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Район успешно создан
+          schema:
+            $ref: '#/definitions/models.DistrictResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Район с таким названием уже существует
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать район
+      tags:
+      - Районы
+  /admin/districts/{id}:
+    delete:
+      description: Удаление района из системы
+      parameters:
+      - description: ID района
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Район успешно удален
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Район не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: У района есть активные ЖЭУ или здания
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить район
+      tags:
+      - Районы
+    get:
+      description: Возвращает информацию о конкретном районе
+      parameters:
+      - description: ID района
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные района
+          schema:
+            $ref: '#/definitions/models.DistrictResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Район не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить район по ID
+      tags:
+      - Районы
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных района
+      parameters:
+      - description: ID района
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDistrictRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные района
+          schema:
+            $ref: '#/definitions/models.DistrictResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Район не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Название района уже занято
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить район
+      tags:
+      - Районы
+  /admin/elements:
+    get:
+      description: Возвращает список всех элементов для чек-листов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список элементов
+          schema:
+            items:
+              $ref: '#/definitions/models.ElementCatalogResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список элементов справочника
+      tags:
+      - Справочник элементов
+    post:
+      consumes:
+      - application/json
+      description: 'Создание нового элемента для использования в чек-листах (например:
+        Фундамент, Кровля)'
+      parameters:
+      - description: Данные элемента
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateElementCatalogRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Элемент успешно создан
+          schema:
+            $ref: '#/definitions/models.ElementCatalogResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Элемент с таким именем уже существует
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать элемент справочника
+      tags:
+      - Справочник элементов
+  /admin/elements/{id}:
+    delete:
+      description: Удаление элемента из справочника
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Элемент успешно удален
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Элемент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Элемент используется в чек-листах
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить элемент
+      tags:
+      - Справочник элементов
+    get:
+      description: Возвращает информацию о конкретном элементе справочника
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные элемента
+          schema:
+            $ref: '#/definitions/models.ElementCatalogResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Элемент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить элемент по ID
+      tags:
+      - Справочник элементов
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных элемента справочника
+      parameters:
+      - description: ID элемента
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateElementCatalogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные элемента
+          schema:
+            $ref: '#/definitions/models.ElementCatalogResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Элемент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Имя элемента уже занято
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить элемент
+      tags:
+      - Справочник элементов
+  /admin/jkhunits:
+    get:
+      description: Возвращает список всех жилищно-эксплуатационных единиц
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список ЖЭУ
+          schema:
+            items:
+              $ref: '#/definitions/models.JkhUnitResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список ЖЭУ
+      tags:
+      - ЖЭУ
+    post:
+      consumes:
+      - application/json
+      description: Создание новой жилищно-эксплуатационной единицы
+      parameters:
+      - description: Данные ЖЭУ
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateJkhUnitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ЖЭУ успешно создано
+          schema:
+            $ref: '#/definitions/models.JkhUnitResponse'
+        "400":
+          description: Неверный запрос или район не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: ЖЭУ с таким названием уже существует
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать ЖЭУ
+      tags:
+      - ЖЭУ
+  /admin/jkhunits/{id}:
+    delete:
+      description: Удаление жилищно-эксплуатационной единицы из системы
+      parameters:
+      - description: ID ЖЭУ
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ЖЭУ успешно удалено
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: ЖЭУ не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: У ЖЭУ есть активные зависимости
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить ЖЭУ
+      tags:
+      - ЖЭУ
+    get:
+      description: Возвращает информацию о конкретном ЖЭУ
+      parameters:
+      - description: ID ЖЭУ
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные ЖЭУ
+          schema:
+            $ref: '#/definitions/models.JkhUnitResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: ЖЭУ не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить ЖЭУ по ID
+      tags:
+      - ЖЭУ
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных жилищно-эксплуатационной единицы
+      parameters:
+      - description: ID ЖЭУ
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateJkhUnitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные ЖЭУ
+          schema:
+            $ref: '#/definitions/models.JkhUnitResponse'
+        "400":
+          description: Неверный запрос или район не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: ЖЭУ не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Название ЖЭУ уже занято
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить ЖЭУ
+      tags:
+      - ЖЭУ
+  /admin/jkhunits/{id}/inspectors:
+    get:
+      description: Возвращает список инспекторов, привязанных к конкретному ЖЭУ
+      parameters:
+      - description: ID ЖЭУ
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список инспекторов
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить инспекторов ЖЭУ
+      tags:
+      - Назначения инспекторов
+    post:
+      consumes:
+      - application/json
+      description: Привязка инспектора к жилищно-эксплуатационной единице
+      parameters:
+      - description: ID ЖЭУ
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID инспектора
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AssignInspectorToUnitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Инспектор успешно назначен
+          schema:
+            $ref: '#/definitions/models.InspectorAssignmentResponse'
+        "400":
+          description: Неверный запрос или ЖЭУ/инспектор не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Инспектор уже назначен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Назначить инспектора на ЖЭУ
+      tags:
+      - Назначения инспекторов
+  /admin/jkhunits/{id}/inspectors/{inspector_id}:
+    delete:
+      description: Удаление привязки инспектора к жилищно-эксплуатационной единице
+      parameters:
+      - description: ID ЖЭУ
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID инспектора
+        in: path
+        name: inspector_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Инспектор успешно откреплен
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Назначение не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Открепить инспектора от ЖЭУ
+      tags:
+      - Назначения инспекторов
+  /admin/tasks/{id}:
+    delete:
+      description: Удаление задания из системы
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Задание успешно удалено
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить задание
+      tags:
+      - Задания (Администрирование)
+  /admin/users:
+    get:
+      description: Возвращает список всех пользователей системы
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пользователей
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список пользователей
+      tags:
+      - Пользователи
+    post:
+      consumes:
+      - application/json
+      description: Создание нового пользователя в системе (инспектор, координатор
+        или специалист)
+      parameters:
+      - description: Данные нового пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь успешно создан
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Неверный запрос или роль не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Пользователь с таким email/login уже существует
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать пользователя
+      tags:
+      - Пользователи
+  /admin/users/{id}:
+    delete:
+      description: Удаление пользователя из системы
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Пользователь успешно удален
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Нельзя удалить свой аккаунт
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: У пользователя есть активные зависимости
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить пользователя
+      tags:
+      - Пользователи
+    get:
+      description: Возвращает информацию о конкретном пользователе
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить пользователя по ID
+      tags:
+      - Пользователи
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных пользователя (email, имя, роль и т.д.)
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные пользователя
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Нельзя изменить свою роль
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Email или Login уже заняты
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить пользователя
+      tags:
+      - Пользователи
+  /admin/users/{id}/jkhunits:
+    get:
+      description: Возвращает список ЖЭУ, к которым привязан конкретный инспектор
+      parameters:
+      - description: ID пользователя (инспектора)
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список ЖЭУ
+          schema:
+            items:
+              $ref: '#/definitions/models.JkhUnitResponse'
+            type: array
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить ЖЭУ инспектора
+      tags:
+      - Назначения инспекторов
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентификация по логину/email и паролю. Возвращает JWT access
+        и refresh токены.
+      parameters:
+      - description: Данные для входа (логин/email и пароль)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешная авторизация
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Неверный формат запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Неверные учетные данные
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Авторизация пользователя
+      tags:
+      - Авторизация
+  /inspector/tasks:
+    get:
+      description: Возвращает список заданий, назначенных текущему инспектору
+      parameters:
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список заданий инспектора
+          schema:
+            items:
+              $ref: '#/definitions/models.TaskResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить мои задания
+      tags:
+      - Инспектор
+  /inspector/tasks/{id}/accept:
+    post:
+      description: Принятие задания инспектором (переход Pending → InProgress)
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Задание успешно принято
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный ID или недопустимый переход статуса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Принять задание
+      tags:
+      - Инспектор
+  /inspector/tasks/{id}/act:
+    get:
+      description: Скачивание PDF-акта осмотра здания
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: PDF файл акта осмотра
+          schema:
+            type: file
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Акт осмотра не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка генерации акта
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Скачать акт осмотра
+      tags:
+      - Инспектор
+  /inspector/tasks/{id}/results:
+    get:
+      description: Возвращает все результаты осмотра для конкретного задания
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список результатов осмотра
+          schema:
+            items:
+              $ref: '#/definitions/models.InspectionResultResponse'
+            type: array
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить результаты осмотра
+      tags:
+      - Инспектор
+    post:
+      consumes:
+      - application/json
+      description: Создание или обновление результата проверки элемента чек-листа
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Результат осмотра элемента
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateInspectionResultRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Результат сохранен
+          schema:
+            $ref: '#/definitions/models.InspectionResultResponse'
+        "400":
+          description: Неверный запрос или задание не в работе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать/обновить результат осмотра
+      tags:
+      - Инспектор
+  /inspector/tasks/{id}/results/{element_id}:
+    delete:
+      description: Удаление результата осмотра конкретного элемента
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID элемента чек-листа
+        in: path
+        name: element_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Результат успешно удален
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Результат не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить результат осмотра
+      tags:
+      - Инспектор
+  /inspector/tasks/{id}/submit:
+    post:
+      description: Отправка выполненного задания на проверку координатору (переход
+        InProgress → OnReview)
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Задание отправлено на проверку
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный ID или недопустимый переход статуса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Отправить задание на проверку
+      tags:
+      - Инспектор
+  /tasks/:
+    get:
+      description: Возвращает список всех заданий с возможностью фильтрации по статусу
+      parameters:
+      - description: Фильтр по статусу (New, Pending, InProgress, OnReview, ForRevision,
+          Approved, Canceled)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список заданий
+          schema:
+            items:
+              $ref: '#/definitions/models.TaskResponse'
+            type: array
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список всех заданий
+      tags:
+      - Задания
+    post:
+      consumes:
+      - application/json
+      description: Создание нового задания на осмотр здания для инспектора
+      parameters:
+      - description: Данные задания
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Задание успешно создано
+          schema:
+            $ref: '#/definitions/models.TaskDetailResponse'
+        "400":
+          description: Неверный запрос или FK не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать задание
+      tags:
+      - Задания
+  /tasks/{id}:
+    get:
+      description: Возвращает детальную информацию о задании
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные задания
+          schema:
+            $ref: '#/definitions/models.TaskDetailResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить задание по ID
+      tags:
+      - Задания
+  /tasks/{id}/assign:
+    put:
+      consumes:
+      - application/json
+      description: Переназначение инспектора на задание
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID нового инспектора
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AssignInspectorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Инспектор успешно назначен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный запрос или инспектор не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Назначить инспектора
+      tags:
+      - Задания
+  /tasks/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 'Изменение статуса задания (согласно FSM: New→Pending→InProgress→OnReview→Approved/ForRevision)'
+      parameters:
+      - description: ID задания
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новый статус
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTaskStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статус успешно изменен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный запрос или недопустимый переход статуса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задание не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Изменить статус задания
+      tags:
+      - Задания
+  /tasks/analytics/preview:
+    get:
+      description: Генерация графика в формате PNG для предпросмотра
+      parameters:
+      - description: Тип графика
+        enum:
+        - inspector_performance
+        - status_distribution
+        - failure_frequency
+        in: query
+        name: chart
+        required: true
+        type: string
+      - description: Начало периода (YYYY-MM-DD)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: Конец периода (YYYY-MM-DD)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: PNG изображение графика
+          schema:
+            type: file
+        "400":
+          description: Неверные параметры
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка генерации графика
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Предпросмотр графика
+      tags:
+      - Аналитика
+  /tasks/analytics/report:
+    post:
+      consumes:
+      - application/json
+      description: Генерация аналитического PDF отчёта с графиками за указанный период
+      parameters:
+      - description: Параметры отчёта
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AnalyticsReportRequest'
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: PDF файл отчёта
+          schema:
+            type: file
+        "400":
+          description: Неверные параметры
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Не авторизован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка генерации отчёта
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Сгенерировать PDF отчёт
+      tags:
+      - Аналитика
+securityDefinitions:
+  BearerAuth:
+    description: 'Введите JWT токен в формате: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
