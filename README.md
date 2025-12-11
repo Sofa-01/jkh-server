@@ -50,19 +50,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
-## Структура проекта
-
-```
-jkh/
-├── main.go              # Backend entry point
-├── pkg/                 # Backend код
-├── frontend/            # React приложение
-│   ├── src/
-│   └── package.json
-└── package.json         # Корневой для запуска обоих серверов
-```
-
 ## API
 
 Backend API доступен на `http://localhost:8080/api/v1`
